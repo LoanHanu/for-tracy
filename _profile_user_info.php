@@ -113,7 +113,7 @@
                         <button class="btn btn-md btn-outline-gray" data-toggle="modal" data-target="#loginModal"><i class="icon-user-plus"></i><?= trans("follow"); ?></button>
                     <?php endif; ?>
                 </div>
-                <?php if ($generalSettings->hide_vendor_contact_information != 1): ?>
+                <?php if ($generalSettings->hide_vendor_contact_information != 1 || (!empty(user()) && $user->id == user()->id)): ?>
                     <div class="social">
                         <ul>
                             <?php if (!empty($user->personal_website_url)): ?>
