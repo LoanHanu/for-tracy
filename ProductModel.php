@@ -65,35 +65,41 @@ class ProductModel extends BaseModel
         if (empty($data['multiple_sale'])) {
             $data['multiple_sale'] = 0;
         }
+
         //set category id
         $data['category_id'] = getDropdownCategoryId();
         if ($this->builder->insert($data)) {
+            $productId = $this->db->insertID();
             if($this->generalSettings->send_email_added_to_favorite){
-                $this->addNewProductEmail();
+                $this->addNewProductEmail($data['user_id']);
             }
-            return $this->db->insertID();
+
+            return $productId;
         }
-        return false;
+        else return false;
     }
 
-    public function addNewProductEmail(){
+    public function addNewProductEmail($shopId){
         $authModel = new AuthModel();
-        $favoriteUsers = $authModel->getFavoriteUsers(3);//$data['user_id']);
-        foreach ($favoriteUsers as $favoriteUser){
-            $emailData = [
-                'email_type' => 'favorite_shop_add_product',
-                'email_address' => getUser($favoriteUser->favourite_user_id)->email,
-                'email_subject' => "Favorite Shop Add New Product",
-                'template_path' => 'email/main',
-                'email_data' => serialize([
-                    'content' => 'Favorite Shop Add New Product'.'</br>'.getUsernameByUserId(3).' add new product. ',
-                    'url' => base_url(),
-                    'buttonText' => trans("see_details")
-                ])
-            ];
-            addToEmailQueue($emailData);
+        $favoriteUsers = $authModel->getFavoriteUsers($shopId);
+        if(count($favoriteUsers) != 0){
+            foreach ($favoriteUsers as $favoriteUser){
+                $emailData = [
+                    'email_type' => 'favorite_shop_add_product',
+                    'email_address' => getUser($favoriteUser->favourite_user_id)->email,
+                    'email_subject' => "Favorite Shop Add New Product",
+                    'template_path' => 'email/main',
+                    'email_data' => serialize([
+                        'content' => 'Favorite Shop Add New Product'.'</br>'.getUsernameByUserId($favoriteUser->shop_owner_id).' add new product. ',
+                        'url' => base_url(),
+                        'buttonText' => trans("see_details")
+                    ])
+                ];
+                addToEmailQueue($emailData);
+            }
         }
     }
+
     //add product title and desc
     public function addProductTitleDesc($productId)
     {
@@ -146,7 +152,7 @@ class ProductModel extends BaseModel
     //edit product details
     public function editProductDetails($id)
     {
-        $product = $this->getProduct($id);
+        $feeModel = new FeeModel();
         $data = [
             'sku' => inputPost('sku'),
             'price' => inputPost('price'),
@@ -210,11 +216,18 @@ class ProductModel extends BaseModel
                 $data['status'] = 1;
             }
         }
+        if($data["stock"] > $this->getStock(clrNum($id)) && !isAdmin()){
+            //add listing fee
+            $feeModel->addRelistingFee($id);
+        }else if( $this->getStock(clrNum($id)) == 1 && !isAdmin()){
+            $feeModel->addListingFee($id);
+        }
         if ($this->builder->where('id', clrNum($id))->update($data)) {
             if ($isSkuValid == false) {
                 setErrorMessage(trans("msg_error_sku"));
                 return redirect()->back();
             }
+
             return true;
         }
         return false;
@@ -1043,5 +1056,10 @@ class ProductModel extends BaseModel
         $authModel = new AuthModel();
         $product = $this->builder->select('user_id')->where('id', $productId)->get()->getRow();
         return $authModel->getUser($product->user_id);
+    }
+
+    //get product stock
+    public function getStock($productId){
+        return $this->builder->where("id", $productId)->select("stock")->get()->getResult()[0]->stock;
     }
 }
