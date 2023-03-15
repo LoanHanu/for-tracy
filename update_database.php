@@ -37,35 +37,8 @@ function update35()
 {
     global $connection;
 
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_refund_request` tinyint(1) DEFAULT 1");
+	runQuery("ALTER TABLE general_settings ADD COLUMN `listing_fee` float DEFAULT 5.25");
 	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_payout_request` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_new_review_set` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_membership_plan_change` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_purchase_made` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_featured_product_purchased` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_product_abuse_report` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_support_ticket` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_newsletter` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_contact_with_contact_us_form` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_vacation_mode_notification` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_message_email` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE general_settings ADD COLUMN `send_email_added_to_favorite` tinyint(1) DEFAULT 1");
-	
-	runQuery("ALTER TABLE badge_awarded_users ADD COLUMN `is_awarded` tinyint(1) DEFAULT 0");
-
-    sleep(1);
 }
 ?>
 
@@ -212,7 +185,7 @@ function update35()
             <div class="row">
                 <div class="col-sm-12">
                     <div class="install-box">
-                        <h2 class="title">Update for Awarding Badge and Email System</h2>
+                        <h2 class="title">Update for Listing Fee</h2>
                         <br><br>
                         <div class="messages">
                             <?php if (!empty($error)) { ?>
